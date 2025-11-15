@@ -371,10 +371,10 @@ export default function AILearning({ traderId }: AILearningProps) {
               </div>
               <div>
                 <div className="text-lg font-bold" style={{ color: '#C4B5FD' }}>
-                  夏普比率
+                  {t('sharpeRatio', language)}
                 </div>
                 <div className="text-xs" style={{ color: '#94A3B8' }}>
-                  风险调整后收益 · AI自我进化指标
+                  {t('riskAdjustedReturns', language)}
                 </div>
               </div>
             </div>
