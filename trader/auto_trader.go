@@ -461,9 +461,9 @@ func (at *AutoTrader) runCycle() error {
 
 	if decision != nil && decision.AIRequestDurationMs > 0 {
 		record.AIRequestDurationMs = decision.AIRequestDurationMs
-		log.Printf("⏱️ AI调用耗时: %.2f 秒", float64(record.AIRequestDurationMs)/1000)
+		log.Printf("⏱️ AI Call Duration: %.2f sec", float64(record.AIRequestDurationMs)/1000)
 		record.ExecutionLog = append(record.ExecutionLog,
-			fmt.Sprintf("AI调用耗时: %d ms", record.AIRequestDurationMs))
+			fmt.Sprintf("AI Call Duration: %d ms", record.AIRequestDurationMs))
 	}
 
 	// 即使有错误，也保存思维链、决策和输入prompt（用于debug）
@@ -554,10 +554,10 @@ func (at *AutoTrader) runCycle() error {
 		if err := at.executeDecisionWithRecord(&d, &actionRecord); err != nil {
 			log.Printf("❌ 执行决策失败 (%s %s): %v", d.Symbol, d.Action, err)
 			actionRecord.Error = err.Error()
-			record.ExecutionLog = append(record.ExecutionLog, fmt.Sprintf("❌ %s %s 失败: %v", d.Symbol, d.Action, err))
+			record.ExecutionLog = append(record.ExecutionLog, fmt.Sprintf("❌ %s %s failed: %v", d.Symbol, d.Action, err))
 		} else {
 			actionRecord.Success = true
-			record.ExecutionLog = append(record.ExecutionLog, fmt.Sprintf("✓ %s %s 成功", d.Symbol, d.Action))
+			record.ExecutionLog = append(record.ExecutionLog, fmt.Sprintf("✓ %s %s succeeded", d.Symbol, d.Action))
 			// 成功执行后短暂延迟
 			time.Sleep(1 * time.Second)
 		}
