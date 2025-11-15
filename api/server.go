@@ -2290,6 +2290,9 @@ func (s *Server) getEquityHistoryForTraders(traderIDs []string) map[string]inter
 			initialBalance = records[0].AccountState.TotalBalance
 		}
 
+		// 🔍 Debug: 记录关键信息
+		log.Printf("📊 [%s] Initial Balance: %.2f, Records: %d", traderID, initialBalance, len(records))
+
 		// 构建收益率历史数据
 		history := make([]map[string]interface{}, 0, len(records))
 		for _, record := range records {
@@ -2307,6 +2310,16 @@ func (s *Server) getEquityHistoryForTraders(traderIDs []string) map[string]inter
 				"total_pnl":    totalPnL, // 修正：使用真实的 total P&L
 				"balance":      record.AccountState.TotalBalance,
 			})
+		}
+
+		// 🔍 Debug: แสดงข้อมูลตัวอย่าง
+		if len(history) > 0 {
+			first := history[0]
+			last := history[len(history)-1]
+			log.Printf("📊 [%s] First: pnl=%.2f, Last: pnl=%.2f",
+				traderID,
+				first["total_pnl"].(float64),
+				last["total_pnl"].(float64))
 		}
 
 		histories[traderID] = history
