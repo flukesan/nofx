@@ -2269,11 +2269,25 @@ func (s *Server) getEquityHistoryForTraders(traderIDs []string) map[string]inter
 			continue
 		}
 
+		// 获取初始余额（从 trader status）
+		initialBalance := 0.0
+		if status := trader.GetStatus(); status != nil {
+			if ib, ok := status["initial_balance"].(float64); ok && ib > 0 {
+				initialBalance = ib
+			}
+		}
+
 		// 获取历史数据（用于对比展示，限制数据量）
 		records, err := trader.GetDecisionLogger().GetLatestRecords(500)
 		if err != nil {
 			errors[traderID] = fmt.Sprintf("获取历史数据失败: %v", err)
 			continue
+		}
+
+		// 如果无法从 status 获取初始余额，且有历史记录，则从第一条记录推算
+		if initialBalance == 0 && len(records) > 0 {
+			// 使用第一条记录的 balance 作为初始余额的近似值
+			initialBalance = records[0].AccountState.TotalBalance
 		}
 
 		// 构建收益率历史数据
@@ -2282,10 +2296,15 @@ func (s *Server) getEquityHistoryForTraders(traderIDs []string) map[string]inter
 			// 计算总权益（余额+未实现盈亏）
 			totalEquity := record.AccountState.TotalBalance + record.AccountState.TotalUnrealizedProfit
 
+			// ✅ 修正：计算真实的 total_pnl (包含 realized + unrealized)
+			// total_pnl = 当前余额 - 初始余额
+			// 这样会包含所有已实现和未实现的盈亏
+			totalPnL := record.AccountState.TotalBalance - initialBalance
+
 			history = append(history, map[string]interface{}{
 				"timestamp":    record.Timestamp,
 				"total_equity": totalEquity,
-				"total_pnl":    record.AccountState.TotalUnrealizedProfit,
+				"total_pnl":    totalPnL, // 修正：使用真实的 total P&L
 				"balance":      record.AccountState.TotalBalance,
 			})
 		}
