@@ -447,15 +447,14 @@ export default function AILearning({ traderId }: AILearningProps) {
                   style={{ color: '#DDD6FE' }}
                 >
                   {performance.sharpe_ratio >= 2 &&
-                    '✨ AI策略非常有效！风险调整后收益优异，可适度扩大仓位但保持纪律。'}
+                    t('sharpeExcellent', language)}
                   {performance.sharpe_ratio >= 1 &&
                     performance.sharpe_ratio < 2 &&
-                    '✅ 策略表现稳健，风险收益平衡良好，继续保持当前策略。'}
+                    t('sharpeGood', language)}
                   {performance.sharpe_ratio >= 0 &&
                     performance.sharpe_ratio < 1 &&
-                    '⚠️ 收益为正但波动较大，AI正在优化策略，降低风险。'}
-                  {performance.sharpe_ratio < 0 &&
-                    '🚨 当前策略需要调整！AI已自动进入保守模式，减少仓位和交易频率。'}
+                    t('sharpeFair', language)}
+                  {performance.sharpe_ratio < 0 && t('sharpePoor', language)}
                 </div>
               </div>
             )}
@@ -566,18 +565,18 @@ export default function AILearning({ traderId }: AILearningProps) {
                 style={{ color: '#FEF3C7' }}
               >
                 {(performance.profit_factor || 0) >= 2.0 &&
-                  '🔥 盈利能力出色！每亏1元能赚' +
-                    (performance.profit_factor || 0).toFixed(1) +
-                    '元，AI策略表现优异。'}
+                  t('profitFactorExcellent', language, {
+                    value: (performance.profit_factor || 0).toFixed(1),
+                  })}
                 {(performance.profit_factor || 0) >= 1.5 &&
                   (performance.profit_factor || 0) < 2.0 &&
-                  '✓ 策略稳定盈利，盈亏比健康，继续保持纪律性交易。'}
+                  t('profitFactorGood', language)}
                 {(performance.profit_factor || 0) >= 1.0 &&
                   (performance.profit_factor || 0) < 1.5 &&
-                  '⚠️ 策略略有盈利但需优化，AI正在调整仓位和止损策略。'}
+                  t('profitFactorFair', language)}
                 {(performance.profit_factor || 0) > 0 &&
                   (performance.profit_factor || 0) < 1.0 &&
-                  '❌ 平均亏损大于盈利，需要调整策略或降低交易频率。'}
+                  t('profitFactorPoor', language)}
               </div>
             </div>
           </div>

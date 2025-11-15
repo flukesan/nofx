@@ -117,6 +117,19 @@ export const translations = {
     good: '✓ Good - Stable profits',
     fair: '⚠️ Fair - Needs optimization',
     poor: '❌ Poor - Losses exceed gains',
+
+    // Sharpe Ratio Messages
+    sharpeExcellent: '✨ AI strategy is highly effective! Risk-adjusted returns are excellent, consider moderate position expansion while maintaining discipline.',
+    sharpeGood: '✅ Strategy performs well with balanced risk-reward, continue current approach.',
+    sharpeFair: '⚠️ Positive returns but high volatility, AI is optimizing strategy to reduce risk.',
+    sharpePoor: '🚨 Current strategy needs adjustment! AI has automatically entered conservative mode, reducing position sizes and trading frequency.',
+
+    // Profit Factor Messages
+    profitFactorExcellent: '🔥 Excellent profitability! For every $1 lost, the strategy earns ${value}, AI performance is outstanding.',
+    profitFactorGood: '✓ Strategy is consistently profitable with healthy profit/loss ratio, continue disciplined trading.',
+    profitFactorFair: '⚠️ Strategy is slightly profitable but needs optimization, AI is adjusting position sizes and stop-loss strategy.',
+    profitFactorPoor: '❌ Average losses exceed gains, strategy needs adjustment or reduced trading frequency.',
+
     bestPerformer: 'Best Performer',
     worstPerformer: 'Worst Performer',
     symbolPerformance: 'Symbol Performance',
@@ -962,6 +975,19 @@ export const translations = {
     good: '✓ 良好 - 稳定盈利',
     fair: '⚠️ 一般 - 需要优化',
     poor: '❌ 较差 - 亏损超过盈利',
+
+    // Sharpe Ratio Messages
+    sharpeExcellent: '✨ AI策略非常有效！风险调整后收益优异，可适度扩大仓位但保持纪律。',
+    sharpeGood: '✅ 策略表现稳健，风险收益平衡良好，继续保持当前策略。',
+    sharpeFair: '⚠️ 收益为正但波动较大，AI正在优化策略，降低风险。',
+    sharpePoor: '🚨 当前策略需要调整！AI已自动进入保守模式，减少仓位和交易频率。',
+
+    // Profit Factor Messages
+    profitFactorExcellent: '🔥 盈利能力出色！每亏1元能赚{value}元，AI策略表现优异。',
+    profitFactorGood: '✓ 策略稳定盈利，盈亏比健康，继续保持纪律性交易。',
+    profitFactorFair: '⚠️ 策略略有盈利但需优化，AI正在调整仓位和止损策略。',
+    profitFactorPoor: '❌ 平均亏损大于盈利，需要调整策略或降低交易频率。',
+
     bestPerformer: '最佳表现',
     worstPerformer: '最差表现',
     symbolPerformance: '📊 币种表现',
