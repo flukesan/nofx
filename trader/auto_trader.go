@@ -479,19 +479,19 @@ func (at *AutoTrader) runCycle() error {
 
 	if err != nil {
 		record.Success = false
-		record.ErrorMessage = fmt.Sprintf("获取AI决策失败: %v", err)
+		record.ErrorMessage = fmt.Sprintf("failed to get AI decision: %v", err)
 
-		// 打印系统提示词和AI思维链（即使有错误，也要输出以便调试）
+		// Print system prompt and AI chain of thought (even on error, for debugging)
 		if decision != nil {
 			log.Print("\n" + strings.Repeat("=", 70) + "\n")
-			log.Printf("📋 系统提示词 [模板: %s] (错误情况)", at.systemPromptTemplate)
+			log.Printf("📋 System Prompt [template: %s] (error case)", at.systemPromptTemplate)
 			log.Println(strings.Repeat("=", 70))
 			log.Println(decision.SystemPrompt)
 			log.Println(strings.Repeat("=", 70))
 
 			if decision.CoTTrace != "" {
 				log.Print("\n" + strings.Repeat("-", 70) + "\n")
-				log.Println("💭 AI思维链分析（错误情况）:")
+				log.Println("💭 AI Chain of Thought Analysis (error case):")
 				log.Println(strings.Repeat("-", 70))
 				log.Println(decision.CoTTrace)
 				log.Println(strings.Repeat("-", 70))
@@ -499,7 +499,7 @@ func (at *AutoTrader) runCycle() error {
 		}
 
 		at.decisionLogger.LogDecision(record)
-		return fmt.Errorf("获取AI决策失败: %w", err)
+		return fmt.Errorf("failed to get AI decision: %w", err)
 	}
 
 	// // 5. 打印系统提示词

@@ -143,24 +143,24 @@ func GetFullDecisionWithCustomPrompt(ctx *Context, mcpClient *mcp.Client, custom
 		return nil, fmt.Errorf("调用AI API失败: %w", err)
 	}
 
-	// 4. 解析AI响应
+	// 4. Parse AI response
 	decision, err := parseFullDecisionResponse(aiResponse, ctx.Account.TotalEquity, ctx.BTCETHLeverage, ctx.AltcoinLeverage)
 
-	// 无论是否有错误，都要保存 SystemPrompt 和 UserPrompt（用于调试和决策未执行后的问题定位）
+	// Save SystemPrompt and UserPrompt regardless of errors (for debugging and troubleshooting)
 	if decision != nil {
 		decision.Timestamp = time.Now()
-		decision.SystemPrompt = systemPrompt // 保存系统prompt
-		decision.UserPrompt = userPrompt     // 保存输入prompt
+		decision.SystemPrompt = systemPrompt // Save system prompt
+		decision.UserPrompt = userPrompt     // Save input prompt
 		decision.AIRequestDurationMs = aiCallDuration.Milliseconds()
 	}
 
 	if err != nil {
-		return decision, fmt.Errorf("解析AI响应失败: %w", err)
+		return decision, fmt.Errorf("failed to parse AI response: %w", err)
 	}
 
 	decision.Timestamp = time.Now()
-	decision.SystemPrompt = systemPrompt // 保存系统prompt
-	decision.UserPrompt = userPrompt     // 保存输入prompt
+	decision.SystemPrompt = systemPrompt // Save system prompt
+	decision.UserPrompt = userPrompt     // Save input prompt
 	return decision, nil
 }
 
@@ -474,12 +474,12 @@ func parseFullDecisionResponse(aiResponse string, accountEquity float64, btcEthL
 		}, fmt.Errorf("提取决策失败: %w", err)
 	}
 
-	// 3. 验证决策
+	// 3. Validate decisions
 	if err := validateDecisions(decisions, accountEquity, btcEthLeverage, altcoinLeverage); err != nil {
 		return &FullDecision{
 			CoTTrace:  cotTrace,
 			Decisions: decisions,
-		}, fmt.Errorf("决策验证失败: %w", err)
+		}, fmt.Errorf("decision validation failed: %w", err)
 	}
 
 	return &FullDecision{
@@ -698,9 +698,9 @@ func findMatchingBracket(s string, start int) int {
 	return -1
 }
 
-// validateDecision 验证单个决策的有效性
+// validateDecision validates a single decision
 func validateDecision(d *Decision, accountEquity float64, btcEthLeverage, altcoinLeverage int) error {
-	// 验证action
+	// Validate action
 	validActions := map[string]bool{
 		"open_long":          true,
 		"open_short":         true,
@@ -714,80 +714,80 @@ func validateDecision(d *Decision, accountEquity float64, btcEthLeverage, altcoi
 	}
 
 	if !validActions[d.Action] {
-		return fmt.Errorf("无效的action: %s", d.Action)
+		return fmt.Errorf("invalid action: %s", d.Action)
 	}
 
-	// 开仓操作必须提供完整参数
+	// Opening position requires complete parameters
 	if d.Action == "open_long" || d.Action == "open_short" {
-		// 根据币种使用配置的杠杆上限
-		maxLeverage := altcoinLeverage          // 山寨币使用配置的杠杆
-		maxPositionValue := accountEquity * 1.5 // 山寨币最多1.5倍账户净值
+		// Use configured leverage limit based on coin type
+		maxLeverage := altcoinLeverage          // Altcoins use configured leverage
+		maxPositionValue := accountEquity * 1.5 // Altcoins max 1.5x account equity
 		if d.Symbol == "BTCUSDT" || d.Symbol == "ETHUSDT" {
-			maxLeverage = btcEthLeverage          // BTC和ETH使用配置的杠杆
-			maxPositionValue = accountEquity * 10 // BTC/ETH最多10倍账户净值
+			maxLeverage = btcEthLeverage          // BTC and ETH use configured leverage
+			maxPositionValue = accountEquity * 10 // BTC/ETH max 10x account equity
 		}
 
-		// ✅ Fallback 机制：杠杆超限时自动修正为上限值（而不是直接拒绝决策）
+		// ✅ Fallback mechanism: auto-correct leverage to upper limit instead of rejecting decision
 		if d.Leverage <= 0 {
-			return fmt.Errorf("杠杆必须大于0: %d", d.Leverage)
+			return fmt.Errorf("leverage must be greater than 0: %d", d.Leverage)
 		}
 		if d.Leverage > maxLeverage {
-			log.Printf("⚠️  [Leverage Fallback] %s 杠杆超限 (%dx > %dx)，自动调整为上限值 %dx",
+			log.Printf("⚠️  [Leverage Fallback] %s leverage exceeded (%dx > %dx), auto-adjusted to max %dx",
 				d.Symbol, d.Leverage, maxLeverage, maxLeverage)
-			d.Leverage = maxLeverage // 自动修正为上限值
+			d.Leverage = maxLeverage // Auto-correct to upper limit
 		}
 		if d.PositionSizeUSD <= 0 {
-			return fmt.Errorf("仓位大小必须大于0: %.2f", d.PositionSizeUSD)
+			return fmt.Errorf("position size must be greater than 0: %.2f", d.PositionSizeUSD)
 		}
 
-		// ✅ 验证最小开仓金额（防止数量格式化为 0 的错误）
-		// Binance 最小名义价值 10 USDT + 安全边际
-		const minPositionSizeGeneral = 12.0 // 10 + 20% 安全边际
-		const minPositionSizeBTCETH = 60.0  // BTC/ETH 因价格高和精度限制需要更大金额（更灵活）
+		// ✅ Validate minimum position size (prevent quantity rounding to 0 error)
+		// Binance minimum notional value 10 USDT + safety margin
+		const minPositionSizeGeneral = 12.0 // 10 + 20% safety margin
+		const minPositionSizeBTCETH = 60.0  // BTC/ETH requires larger amount due to high price and precision limits
 
 		if d.Symbol == "BTCUSDT" || d.Symbol == "ETHUSDT" {
 			if d.PositionSizeUSD < minPositionSizeBTCETH {
-				return fmt.Errorf("%s 开仓金额过小(%.2f USDT)，必须≥%.2f USDT（因价格高且精度限制，避免数量四舍五入为0）", d.Symbol, d.PositionSizeUSD, minPositionSizeBTCETH)
+				return fmt.Errorf("%s position size too small (%.2f USDT), must be ≥%.2f USDT (due to high price and precision limits, to avoid quantity rounding to 0)", d.Symbol, d.PositionSizeUSD, minPositionSizeBTCETH)
 			}
 		} else {
 			if d.PositionSizeUSD < minPositionSizeGeneral {
-				return fmt.Errorf("开仓金额过小(%.2f USDT)，必须≥%.2f USDT（Binance 最小名义价值要求）", d.PositionSizeUSD, minPositionSizeGeneral)
+				return fmt.Errorf("position size too small (%.2f USDT), must be ≥%.2f USDT (Binance minimum notional value requirement)", d.PositionSizeUSD, minPositionSizeGeneral)
 			}
 		}
 
-		// 验证仓位价值上限（加1%容差以避免浮点数精度问题）
-		tolerance := maxPositionValue * 0.01 // 1%容差
+		// Validate maximum position value (add 1% tolerance to avoid floating point precision issues)
+		tolerance := maxPositionValue * 0.01 // 1% tolerance
 		if d.PositionSizeUSD > maxPositionValue+tolerance {
 			if d.Symbol == "BTCUSDT" || d.Symbol == "ETHUSDT" {
-				return fmt.Errorf("BTC/ETH单币种仓位价值不能超过%.0f USDT（10倍账户净值），实际: %.0f", maxPositionValue, d.PositionSizeUSD)
+				return fmt.Errorf("BTC/ETH single coin position value cannot exceed %.0f USDT (10x account equity), actual: %.0f", maxPositionValue, d.PositionSizeUSD)
 			} else {
-				return fmt.Errorf("山寨币单币种仓位价值不能超过%.0f USDT（1.5倍账户净值），实际: %.0f", maxPositionValue, d.PositionSizeUSD)
+				return fmt.Errorf("altcoin single coin position value cannot exceed %.0f USDT (1.5x account equity), actual: %.0f", maxPositionValue, d.PositionSizeUSD)
 			}
 		}
 		if d.StopLoss <= 0 || d.TakeProfit <= 0 {
-			return fmt.Errorf("止损和止盈必须大于0")
+			return fmt.Errorf("stop loss and take profit must be greater than 0")
 		}
 
-		// 验证止损止盈的合理性
+		// Validate stop loss and take profit rationality
 		if d.Action == "open_long" {
 			if d.StopLoss >= d.TakeProfit {
-				return fmt.Errorf("做多时止损价必须小于止盈价")
+				return fmt.Errorf("for long position, stop loss must be less than take profit")
 			}
 		} else {
 			if d.StopLoss <= d.TakeProfit {
-				return fmt.Errorf("做空时止损价必须大于止盈价")
+				return fmt.Errorf("for short position, stop loss must be greater than take profit")
 			}
 		}
 
-		// 验证风险回报比（必须≥1:3）
-		// 计算入场价（假设当前市价）
+		// Validate risk-reward ratio (must be ≥1:3)
+		// Calculate entry price (assume current market price)
 		var entryPrice float64
 		if d.Action == "open_long" {
-			// 做多：入场价在止损和止盈之间
-			entryPrice = d.StopLoss + (d.TakeProfit-d.StopLoss)*0.2 // 假设在20%位置入场
+			// Long: entry price between stop loss and take profit
+			entryPrice = d.StopLoss + (d.TakeProfit-d.StopLoss)*0.2 // Assume entry at 20% position
 		} else {
-			// 做空：入场价在止损和止盈之间
-			entryPrice = d.StopLoss - (d.StopLoss-d.TakeProfit)*0.2 // 假设在20%位置入场
+			// Short: entry price between stop loss and take profit
+			entryPrice = d.StopLoss - (d.StopLoss-d.TakeProfit)*0.2 // Assume entry at 20% position
 		}
 
 		var riskPercent, rewardPercent, riskRewardRatio float64
@@ -805,31 +805,31 @@ func validateDecision(d *Decision, accountEquity float64, btcEthLeverage, altcoi
 			}
 		}
 
-		// 硬约束：风险回报比必须≥3.0
+		// Hard constraint: risk-reward ratio must be ≥3.0
 		if riskRewardRatio < 3.0 {
-			return fmt.Errorf("风险回报比过低(%.2f:1)，必须≥3.0:1 [风险:%.2f%% 收益:%.2f%%] [止损:%.2f 止盈:%.2f]",
+			return fmt.Errorf("risk-reward ratio too low (%.2f:1), must be ≥3.0:1 [risk:%.2f%% reward:%.2f%%] [stop_loss:%.2f take_profit:%.2f]",
 				riskRewardRatio, riskPercent, rewardPercent, d.StopLoss, d.TakeProfit)
 		}
 	}
 
-	// 动态调整止损验证
+	// Dynamic stop loss adjustment validation
 	if d.Action == "update_stop_loss" {
 		if d.NewStopLoss <= 0 {
-			return fmt.Errorf("新止损价格必须大于0: %.2f", d.NewStopLoss)
+			return fmt.Errorf("new stop loss price must be greater than 0: %.2f", d.NewStopLoss)
 		}
 	}
 
-	// 动态调整止盈验证
+	// Dynamic take profit adjustment validation
 	if d.Action == "update_take_profit" {
 		if d.NewTakeProfit <= 0 {
-			return fmt.Errorf("新止盈价格必须大于0: %.2f", d.NewTakeProfit)
+			return fmt.Errorf("new take profit price must be greater than 0: %.2f", d.NewTakeProfit)
 		}
 	}
 
-	// 部分平仓验证
+	// Partial close validation
 	if d.Action == "partial_close" {
 		if d.ClosePercentage <= 0 || d.ClosePercentage > 100 {
-			return fmt.Errorf("平仓百分比必须在0-100之间: %.1f", d.ClosePercentage)
+			return fmt.Errorf("close percentage must be between 0-100: %.1f", d.ClosePercentage)
 		}
 	}
 
