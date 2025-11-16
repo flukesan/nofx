@@ -423,12 +423,12 @@ export default function AILearning({ traderId }: AILearningProps) {
                     }}
                   >
                     {performance.sharpe_ratio >= 2
-                      ? '🟢 卓越表现'
+                      ? '🟢 Excellent'
                       : performance.sharpe_ratio >= 1
-                        ? '🟢 良好表现'
+                        ? '🟢 Good'
                         : performance.sharpe_ratio >= 0
-                          ? '🟡 波动较大'
-                          : '🔴 需要调整'}
+                          ? '🟡 High Volatility'
+                          : '🔴 Needs Adjustment'}
                   </div>
                 </div>
               )}

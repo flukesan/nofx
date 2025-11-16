@@ -361,19 +361,19 @@ func buildSystemPrompt(accountEquity float64, btcEthLeverage, altcoinLeverage in
 func buildUserPrompt(ctx *Context) string {
 	var sb strings.Builder
 
-	// 系统状态
-	sb.WriteString(fmt.Sprintf("时间: %s | 周期: #%d | 运行: %d分钟\n\n",
+	// System status (concise format to save tokens)
+	sb.WriteString(fmt.Sprintf("Time: %s | Cycle #%d | Runtime: %dmin\n\n",
 		ctx.CurrentTime, ctx.CallCount, ctx.RuntimeMinutes))
 
-	// BTC 市场
+	// BTC market
 	if btcData, hasBTC := ctx.MarketDataMap["BTCUSDT"]; hasBTC {
 		sb.WriteString(fmt.Sprintf("BTC: %.2f (1h: %+.2f%%, 4h: %+.2f%%) | MACD: %.4f | RSI: %.2f\n\n",
 			btcData.CurrentPrice, btcData.PriceChange1h, btcData.PriceChange4h,
 			btcData.CurrentMACD, btcData.CurrentRSI7))
 	}
 
-	// 账户
-	sb.WriteString(fmt.Sprintf("账户: 净值%.2f | 余额%.2f (%.1f%%) | 盈亏%+.2f%% | 保证金%.1f%% | 持仓%d个\n\n",
+	// Account (concise)
+	sb.WriteString(fmt.Sprintf("Account: Equity %.2f | Avail %.2f (%.1f%%) | PnL %+.2f%% | Margin %.1f%% | Pos %d\n\n",
 		ctx.Account.TotalEquity,
 		ctx.Account.AvailableBalance,
 		(ctx.Account.AvailableBalance/ctx.Account.TotalEquity)*100,
@@ -381,44 +381,44 @@ func buildUserPrompt(ctx *Context) string {
 		ctx.Account.MarginUsedPct,
 		ctx.Account.PositionCount))
 
-	// 持仓（完整市场数据）
+	// Current positions (concise format)
 	if len(ctx.Positions) > 0 {
-		sb.WriteString("## 当前持仓\n")
+		sb.WriteString("## Current Positions\n")
 		for i, pos := range ctx.Positions {
-			// 计算持仓时长
+			// Calculate holding duration (concise)
 			holdingDuration := ""
 			if pos.UpdateTime > 0 {
 				durationMs := time.Now().UnixMilli() - pos.UpdateTime
-				durationMin := durationMs / (1000 * 60) // 转换为分钟
+				durationMin := durationMs / (1000 * 60)
 				if durationMin < 60 {
-					holdingDuration = fmt.Sprintf(" | 持仓时长%d分钟", durationMin)
+					holdingDuration = fmt.Sprintf(" | %dmin", durationMin)
 				} else {
 					durationHour := durationMin / 60
 					durationMinRemainder := durationMin % 60
-					holdingDuration = fmt.Sprintf(" | 持仓时长%d小时%d分钟", durationHour, durationMinRemainder)
+					holdingDuration = fmt.Sprintf(" | %dh%dm", durationHour, durationMinRemainder)
 				}
 			}
 
-			// 计算仓位价值（用于 partial_close 检查）
+			// Position value
 			positionValue := math.Abs(pos.Quantity) * pos.MarkPrice
 
-			sb.WriteString(fmt.Sprintf("%d. %s %s | 入场价%.4f 当前价%.4f | 数量%.4f | 仓位价值%.2f USDT | 盈亏%+.2f%% | 盈亏金额%+.2f USDT | 最高收益率%.2f%% | 杠杆%dx | 保证金%.0f | 强平价%.4f%s\n\n",
+			sb.WriteString(fmt.Sprintf("%d. %s %s | Entry %.4f Cur %.4f | Qty %.4f | Val %.2fU | PnL %+.2f%% (%+.2fU) | Peak %.2f%% | Lev %dx | Margin %.0f | Liq %.4f%s\n\n",
 				i+1, pos.Symbol, strings.ToUpper(pos.Side),
 				pos.EntryPrice, pos.MarkPrice, pos.Quantity, positionValue, pos.UnrealizedPnLPct, pos.UnrealizedPnL, pos.PeakPnLPct,
 				pos.Leverage, pos.MarginUsed, pos.LiquidationPrice, holdingDuration))
 
-			// 使用FormatMarketData输出完整市场数据
+			// Market data (use existing format)
 			if marketData, ok := ctx.MarketDataMap[pos.Symbol]; ok {
 				sb.WriteString(market.Format(marketData))
 				sb.WriteString("\n")
 			}
 		}
 	} else {
-		sb.WriteString("当前持仓: 无\n\n")
+		sb.WriteString("Current Positions: None\n\n")
 	}
 
-	// 候选币种（完整市场数据）
-	sb.WriteString(fmt.Sprintf("## 候选币种 (%d个)\n\n", len(ctx.MarketDataMap)))
+	// Candidate coins (concise)
+	sb.WriteString(fmt.Sprintf("## Candidate Coins (%d)\n\n", len(ctx.MarketDataMap)))
 	displayedCount := 0
 	for _, coin := range ctx.CandidateCoins {
 		marketData, hasData := ctx.MarketDataMap[coin.Symbol]
@@ -429,34 +429,34 @@ func buildUserPrompt(ctx *Context) string {
 
 		sourceTags := ""
 		if len(coin.Sources) > 1 {
-			sourceTags = " (AI500+OI_Top双重信号)"
+			sourceTags = " (AI500+OI_Top)"
 		} else if len(coin.Sources) == 1 && coin.Sources[0] == "oi_top" {
-			sourceTags = " (OI_Top持仓增长)"
+			sourceTags = " (OI_Top)"
 		}
 
-		// 使用FormatMarketData输出完整市场数据
+		// Market data (use existing format)
 		sb.WriteString(fmt.Sprintf("### %d. %s%s\n\n", displayedCount, coin.Symbol, sourceTags))
 		sb.WriteString(market.Format(marketData))
 		sb.WriteString("\n")
 	}
 	sb.WriteString("\n")
 
-	// 夏普比率（直接传值，不要复杂格式化）
+	// Sharpe Ratio (concise)
 	if ctx.Performance != nil {
-		// 直接从interface{}中提取SharpeRatio
+		// Extract SharpeRatio from interface{}
 		type PerformanceData struct {
 			SharpeRatio float64 `json:"sharpe_ratio"`
 		}
 		var perfData PerformanceData
 		if jsonData, err := json.Marshal(ctx.Performance); err == nil {
 			if err := json.Unmarshal(jsonData, &perfData); err == nil {
-				sb.WriteString(fmt.Sprintf("## 📊 夏普比率: %.2f\n\n", perfData.SharpeRatio))
+				sb.WriteString(fmt.Sprintf("## 📊 Sharpe Ratio: %.2f\n\n", perfData.SharpeRatio))
 			}
 		}
 	}
 
 	sb.WriteString("---\n\n")
-	sb.WriteString("现在请分析并输出决策（思维链 + JSON）\n")
+	sb.WriteString("Analyze and output decisions (reasoning + TOON format)\n")
 
 	return sb.String()
 }
