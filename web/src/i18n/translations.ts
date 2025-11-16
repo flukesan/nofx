@@ -848,6 +848,33 @@ export const translations = {
         'Invalid private key format (should be 64 hex characters)',
       privatekeyObfuscationFailed: 'Clipboard obfuscation failed',
     },
+
+    // Performance Analysis
+    sharpeRatio: 'Sharpe Ratio',
+    riskAdjustedReturns: 'Risk-adjusted returns · AI self-evolution metric',
+    avgWinDivLoss: 'Avg Win ÷ Avg Loss',
+    excellent: '🔥 Excellent - Strong profitability',
+    good: '✓ Good - Stable profits',
+    fair: '⚠️ Fair - Needs optimization',
+    poor: '❌ Poor - Losses exceed profits',
+
+    // Sharpe Ratio Messages
+    sharpeExcellent: '✨ AI strategy highly effective! Excellent risk-adjusted returns. Can moderately increase positions while maintaining discipline.',
+    sharpeGood: '✅ Strategy performing steadily with good risk-reward balance. Continue current approach.',
+    sharpeFair: '⚠️ Positive returns but high volatility. AI optimizing strategy to reduce risk.',
+    sharpePoor: '🚨 Current strategy needs adjustment! AI has entered conservative mode, reducing positions and trade frequency.',
+
+    // Profit Factor Messages
+    profitFactorExcellent: '🔥 Excellent profitability! Earning {value} for every 1 lost. AI strategy performing exceptionally.',
+    profitFactorGood: '✓ Strategy consistently profitable with healthy profit ratio. Maintain disciplined trading.',
+    profitFactorFair: '⚠️ Slightly profitable but needs optimization. AI adjusting positions and stop-loss strategy.',
+    profitFactorPoor: '❌ Average losses exceed profits. Need to adjust strategy or reduce trade frequency.',
+
+    // Performance Status Labels (for Sharpe Ratio display)
+    performanceOust: '🟢 Excellent',
+    performanceGood: '🟢 Good',
+    performanceHighVol: '🟡 High Volatility',
+    performanceNeedAdj: '🔴 Needs Adjustment',
   },
   zh: {
     // Header
@@ -959,25 +986,32 @@ export const translations = {
     avgWin: '平均盈利',
     avgLoss: '平均亏损',
     profitFactor: '盈亏比',
-    sharpeRatio: 'Sharpe Ratio',
-    riskAdjustedReturns: 'Risk-adjusted returns · AI self-evolution metric',
-    avgWinDivLoss: 'Avg Win ÷ Avg Loss',
-    excellent: '🔥 Excellent - Strong profitability',
-    good: '✓ Good - Stable profits',
-    fair: '⚠️ Fair - Needs optimization',
-    poor: '❌ Poor - Losses exceed profits',
+    sharpeRatio: '夏普比率',
+    riskAdjustedReturns: '风险调整后收益 · AI自我进化指标',
+    avgWinDivLoss: '平均盈利 ÷ 平均亏损',
+    excellent: '🔥 优秀 - 盈利能力强',
+    good: '✓ 良好 - 稳定盈利',
+    fair: '⚠️ 一般 - 需要优化',
+    poor: '❌ 较差 - 亏损超过盈利',
 
     // Sharpe Ratio Messages
-    sharpeExcellent: '✨ AI strategy highly effective! Excellent risk-adjusted returns. Can moderately increase positions while maintaining discipline.',
-    sharpeGood: '✅ Strategy performing steadily with good risk-reward balance. Continue current approach.',
-    sharpeFair: '⚠️ Positive returns but high volatility. AI optimizing strategy to reduce risk.',
-    sharpePoor: '🚨 Current strategy needs adjustment! AI has entered conservative mode, reducing positions and trade frequency.',
+    sharpeExcellent: '✨ AI策略非常有效！风险调整后收益优异，可适度扩大仓位但保持纪律。',
+    sharpeGood: '✅ 策略表现稳健，风险收益平衡良好，继续保持当前策略。',
+    sharpeFair: '⚠️ 收益为正但波动较大，AI正在优化策略，降低风险。',
+    sharpePoor: '🚨 当前策略需要调整！AI已自动进入保守模式，减少仓位和交易频率。',
 
     // Profit Factor Messages
-    profitFactorExcellent: '🔥 Excellent profitability! Earning {value} for every 1 lost. AI strategy performing exceptionally.',
-    profitFactorGood: '✓ Strategy consistently profitable with healthy profit ratio. Maintain disciplined trading.',
-    profitFactorFair: '⚠️ Slightly profitable but needs optimization. AI adjusting positions and stop-loss strategy.',
-    profitFactorPoor: '❌ Average losses exceed profits. Need to adjust strategy or reduce trade frequency.',
+    profitFactorExcellent: '🔥 盈利能力出色！每亏1元能赚{value}元，AI策略表现优异。',
+    profitFactorGood: '✓ 策略稳定盈利，盈亏比健康，继续保持纪律性交易。',
+    profitFactorFair: '⚠️ 策略略有盈利但需优化，AI正在调整仓位和止损策略。',
+    profitFactorPoor: '❌ 平均亏损大于盈利，需要调整策略或降低交易频率。',
+
+    // Performance Status Labels (for Sharpe Ratio display)
+    performanceOust: '🟢 卓越表现',
+    performanceGood: '🟢 良好表现',
+    performanceHighVol: '🟡 波动较大',
+    performanceNeedAdj: '🔴 需要调整',
+
     bestPerformer: '最佳表现',
     worstPerformer: '最差表现',
     symbolPerformance: '📊 币种表现',

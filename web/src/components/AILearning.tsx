@@ -423,12 +423,12 @@ export default function AILearning({ traderId }: AILearningProps) {
                     }}
                   >
                     {performance.sharpe_ratio >= 2
-                      ? '🟢 Excellent'
+                      ? t('performanceOust', language)
                       : performance.sharpe_ratio >= 1
-                        ? '🟢 Good'
+                        ? t('performanceGood', language)
                         : performance.sharpe_ratio >= 0
-                          ? '🟡 High Volatility'
-                          : '🔴 Needs Adjustment'}
+                          ? t('performanceHighVol', language)
+                          : t('performanceNeedAdj', language)}
                   </div>
                 </div>
               )}
